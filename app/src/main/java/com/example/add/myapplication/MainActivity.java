@@ -3,7 +3,7 @@ package com.example.add.myapplication;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.Utils;
-//import org.opencv.core.Core;
+
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.core.MatOfRect;
