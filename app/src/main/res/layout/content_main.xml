@@ -35,5 +35,11 @@
         android:layout_centerHorizontal="true"
         android:text="灰度化"
         />
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/img"
+        android:text="Click Me"
+        />
 
 </RelativeLayout>
