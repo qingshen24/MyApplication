@@ -13,6 +13,7 @@ import org.opencv.core.Scalar;
 import org.opencv.objdetect.CascadeClassifier;
 
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.FaceDetector;
@@ -31,10 +32,16 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+
 public class MainActivity extends AppCompatActivity
 {
     private ImageView img;
     private Button btn;
+    private File mCascadeFile;
+    private CascadeClassifier faceDetection;
 
     private Bitmap srcBitmap;
     private Bitmap grayBitmap;
@@ -100,16 +107,19 @@ public class MainActivity extends AppCompatActivity
 
 
         Imgproc.equalizeHist(grayMat, grayMat);//直方图均衡化
-        /*
-        CascadeClassifier faceDector = new CascadeClassifier(FaceDetector.class.getResource("haarcascade_frontalface_alt.xml").getPath());
+
+        InputStream is =(getResources().openRawResource(R.raw.haarcascade_eye));
+        File cascadeDir= getDir("cascade",Context.MODE_PRIVATE);
+        mCascadeFile =new File(cascadeDir,"lbspascade.xml");
+        faceDetection = new CascadeClassifier(mCascadeFile.getAbsolutePath());
         MatOfRect faceDetectios =new MatOfRect();
-        faceDector.detectMultiScale(grayMat, faceDetectios);
+        faceDetection.detectMultiScale(grayMat, faceDetectios);
         for (Rect rect: faceDetectios.toArray()){
             Imgproc.rectangle(grayMat,new Point(rect.x,rect.y),new Point(rect.x+rect.width,rect.y+rect.height),new Scalar(0,255,0));
         }
-        */
 
-        Imgproc.Canny(grayMat,grayMat,100.0,2.0);//边缘检测
+
+        //Imgproc.Canny(grayMat,grayMat,100.0,2.0);//边缘检测
         Utils.matToBitmap(grayMat, grayBitmap);//convert Mat to bitMap
         Log.i(TAG, "procSrc2Gray sucess...");
     }
