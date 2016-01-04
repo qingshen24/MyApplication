@@ -31,7 +31,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+{
     private ImageView img;
     private Button btn;
 
@@ -42,7 +43,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "qing_shen";
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
@@ -63,7 +65,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume() {
+    protected void onResume()
+    {
         super.onResume();
         OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, getApplicationContext(), mLoaderCallback);
         Log.i(TAG, "onResume sucess load OpenCV...");
@@ -85,7 +88,8 @@ public class MainActivity extends AppCompatActivity {
     };
 
 
-    public void procSrc2Gray() {
+    public void procSrc2Gray()
+    {
         Mat rgbMat = new Mat();
         Mat grayMat = new Mat();
         srcBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.genie);
@@ -105,12 +109,13 @@ public class MainActivity extends AppCompatActivity {
         }
         */
 
-        //Imgproc.Canny(grayMat,grayMat,100.0,2.0);//边缘检测
+        Imgproc.Canny(grayMat,grayMat,100.0,2.0);//边缘检测
         Utils.matToBitmap(grayMat, grayBitmap);//convert Mat to bitMap
         Log.i(TAG, "procSrc2Gray sucess...");
     }
 
-    public class ProcessClickListener implements View.OnClickListener {
+    public class ProcessClickListener implements View.OnClickListener
+    {
         @Override
         public void onClick(View v) {
             if (isFirst) {
