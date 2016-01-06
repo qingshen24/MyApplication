@@ -6,6 +6,7 @@ import org.opencv.android.Utils;
 
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
+import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
@@ -42,9 +43,10 @@ public class MainActivity extends AppCompatActivity
 {
     private ImageView img;
     private Button btn;
-    private File mCascadefile;
-    private CascadeClassifier faceDetection;
+    private File mCascadefile,eyeCascadefile;
+    private CascadeClassifier faceDetection,eyeDetection;
     private static final Scalar   FACE_RECT_COLOR = new Scalar(0, 255, 0, 255);
+    private static final Scalar   EYE_RECT_COLOR =new Scalar(0,0,255,255);
 
     private Bitmap srcBitmap;
     private Bitmap grayBitmap;
@@ -91,25 +93,23 @@ public class MainActivity extends AppCompatActivity
                 case BaseLoaderCallback.SUCCESS:
                     Log.i(TAG, "加载成功");
                     //load the opencv_source file
-
                     try
                     {
-                        InputStream is = getResources().openRawResource(R.raw.haarcascade_frontalface_alt2);
-                        //获取文件的字节数
-                        //int length = is.available();
-                        //创建byte数组
+                        //load facedetection resourece file
+
+                        InputStream face_is = getResources().openRawResource(R.raw.haarcascade_frontalface_alt2);
                         File cascadeDir =getDir("cascade",Context.MODE_PRIVATE);
                         mCascadefile =new File(cascadeDir,"haarcascade_frontalface_alt2.xml");
-                        FileOutputStream os =new FileOutputStream(mCascadefile);
+                        FileOutputStream face_os =new FileOutputStream(mCascadefile);
                         byte[] buffer = new byte[4096];
                         //将文件的数据读取到byte数组中
                         int bytesRead;
-                        while ((bytesRead = is.read(buffer)) != -1)
+                        while ((bytesRead = face_is.read(buffer)) != -1)
                         {
-                            os.write(buffer,0,bytesRead);
+                            face_os.write(buffer, 0, bytesRead);
                         }
-                        is.close();
-                        os.close();
+                        face_os.close();
+                        face_os.close();
                         faceDetection =new CascadeClassifier(mCascadefile.getAbsolutePath());
                         if(faceDetection.empty()){
                             Log.e(TAG,"Failed to load cascade classfier");
@@ -118,6 +118,25 @@ public class MainActivity extends AppCompatActivity
                             Log.i(TAG,"Loaded cascade classifier form"+mCascadefile.getAbsolutePath());
                         }
                         cascadeDir.delete();
+
+                        //load eyedetection resourece file
+
+                        InputStream eye_is =getResources().openRawResource(R.raw.haarcascade_eye);
+                        File eyeCascadeDir =getDir("eyeCascade",Context.MODE_PRIVATE);
+                        eyeCascadeDir =new File(eyeCascadeDir,"haarcascade_eye.xml");
+                        FileOutputStream eye_os = new FileOutputStream(eyeCascadefile);
+                        byte [] buffer_eye =new byte[4096];
+                        int eye_bytesRead;
+                        while ((eye_bytesRead = eye_is.read(buffer_eye)) != -1)
+                        {
+                            eye_os.write(buffer_eye,0,eye_bytesRead);
+                        }
+                        eye_is.close();
+                        eye_os.close();
+                        eyeDetection =new CascadeClassifier(eyeCascadefile.getAbsolutePath());
+                        eyeCascadeDir.delete();
+
+
                     }catch (Exception e)
                     {
                         e.printStackTrace();
@@ -133,48 +152,48 @@ public class MainActivity extends AppCompatActivity
         }
     };
 
-    /*public static String getString(InputStream inputStream) {
-        InputStreamReader inputStreamReader = null;
-        try {
-            inputStreamReader = new InputStreamReader(inputStream,"utf-8");
-        } catch (UnsupportedOperationException e1) {
-            e1.printStackTrace();
-        }
-        BufferedReader reader = new BufferedReader(inputStreamReader);
-        StringBuilder sb = new StringBuilder("");
-        String line;
-        try {
-            while ((line = reader.readLine()) != null) {
-                sb.append(line);
-                sb.append("\n");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return sb.toString();
-    }
-    */
-
+    //the processing function
     public void procSrc2Gray()
     {
         Mat rgbMat = new Mat();
         Mat grayMat = new Mat();
-        srcBitmap_orgin = BitmapFactory.decodeResource(getResources(), R.drawable.genie);
-        srcBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.genie);
+        srcBitmap_orgin = BitmapFactory.decodeResource(getResources(), R.drawable.man);
+        srcBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.man);
         grayBitmap = Bitmap.createBitmap(srcBitmap.getWidth(), srcBitmap.getHeight(), Bitmap.Config.RGB_565);
         Utils.bitmapToMat(srcBitmap, rgbMat);//convert the bitMap to Mat
         Imgproc.cvtColor(rgbMat, grayMat, Imgproc.COLOR_RGB2GRAY);//using the function of OpneCV to convert to the RGB to gray
+        Imgproc.equalizeHist(grayMat, grayMat);//直方图均衡化
         //进行人脸检测
+
         MatOfRect faces = new MatOfRect();
+        MatOfRect eyes =new MatOfRect();
         faceDetection.detectMultiScale(grayMat,faces,1.1,2,2,new Size(0,0),new Size());
         Rect [] facesArray = faces.toArray();
         for (int i = 0; i < facesArray.length; i++)
             Imgproc.rectangle(rgbMat,facesArray[i].tl(),facesArray[i].br(),FACE_RECT_COLOR,3);
-            //Core.rectangle(mRgba, facesArray[i].tl(), facesArray[i].br(), FACE_RECT_COLOR, 3);
 
-        //Imgproc.equalizeHist(grayMat, grayMat);//直方图均衡化
+        if(facesArray.length>0)
+        {
+            Log.i(TAG,"start to detect eyes");
+            Rect roi = new Rect((int)facesArray[0].tl().x,(int)(facesArray[0].tl().y),facesArray[0].width,(int)(facesArray[0].height));
+            Mat cropped = new Mat();
+            // set the ROI area
+            cropped = grayMat.submat(roi);
+            if(eyeDetection != null)
+                eyeDetection.detectMultiScale(cropped,eyes,1.1,2,2,new Size(0,0),new Size());
+            else
+                Log.i(TAG,"Failed to detect eyes");
+            Rect [] eyesArray =eyes.toArray();
+            Point x1 =new Point();
+            for(int j=0;j<eyesArray.length;j++)
+            {
+                x1.x=facesArray[0].x + eyesArray[j].x + eyesArray[j].width*0.5;
+                x1.y=facesArray[0].y + eyesArray[j].y + eyesArray[j].height*0.5;
+                int Radius=(int)((eyesArray[j].width + eyesArray[j].height)*0.25 );
+                Imgproc.circle(rgbMat, x1, Radius, EYE_RECT_COLOR);
+            }
+        }
 
-        //Imgproc.Canny(grayMat,grayMat,100.0,2.0);//边缘检测
         Utils.matToBitmap(rgbMat, srcBitmap);//convert Mat to bitMap
         Log.i(TAG, "procSrc2Gray sucess...");
     }

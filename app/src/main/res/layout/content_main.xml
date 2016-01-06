@@ -23,9 +23,8 @@
         android:id = "@+id/img"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/genie"
-        android:layout_centerInParent="true"
-        />
+        android:background="@drawable/man"
+        android:layout_centerHorizontal="true" />
 
     <Button
         android:id = "@+id/btn"
