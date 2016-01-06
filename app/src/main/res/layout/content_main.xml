@@ -33,7 +33,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/img"
         android:layout_centerHorizontal="true"
-        android:text="灰度化"
+        android:text="识别人脸"
         />
 
 
